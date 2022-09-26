@@ -1,8 +1,11 @@
 package com.edu.ulab.app.service.impl;
 
 import com.edu.ulab.app.dto.UserDto;
+import com.edu.ulab.app.exception.NotFoundException;
 import com.edu.ulab.app.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -42,19 +45,37 @@ public class UserServiceImplTemplate implements UserService {
     }
 
     @Override
-    public UserDto updateUser(UserDto userDto) {
+    public void updateUser(UserDto userDto) {
         // реализовать недстающие методы
-        return null;
+        if (!isExist(userDto.getId())) {
+            throw new NotFoundException("User with the specified ID does not exist.");
+        }
+        jdbcTemplate.update("UPDATE PERSON SET FULL_NAME=?, TITLE=?, AGE=? WHERE ID=?",
+                new Object[]{userDto.getFullName(), userDto.getTitle(), userDto.getAge(), userDto.getId()});
     }
 
     @Override
     public UserDto getUserById(Long id) {
         // реализовать недстающие методы
-        return null;
+        if (!isExist(id)) {
+            throw new NotFoundException("User with the specified ID does not exist.");
+        }
+        UserDto userDto = jdbcTemplate.queryForObject("SELECT * FROM PERSON WHERE ID=?",
+                BeanPropertyRowMapper.newInstance(UserDto.class), id);
+
+        return userDto;
     }
 
     @Override
     public void deleteUserById(Long id) {
         // реализовать недстающие методы
+        if (!isExist(id)) {
+            throw new NotFoundException("User with the specified ID does not exist.");
+        }
+        jdbcTemplate.update("DELETE FROM PERSON WHERE ID=?", id);
+    }
+
+    public boolean isExist(Long id) {
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject("SELECT EXISTS(SELECT * FROM PERSON WHERE ID=?)", Boolean.class, id));
     }
 }

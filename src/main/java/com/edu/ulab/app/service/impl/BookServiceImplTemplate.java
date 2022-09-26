@@ -3,6 +3,7 @@ package com.edu.ulab.app.service.impl;
 import com.edu.ulab.app.dto.BookDto;
 import com.edu.ulab.app.service.BookService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Objects;
 
 @Slf4j
@@ -46,20 +48,23 @@ public class BookServiceImplTemplate implements BookService {
         return bookDto;
     }
 
-    @Override
+    /*@Override
     public BookDto updateBook(BookDto bookDto) {
         // реализовать недстающие методы
         return null;
+    }*/
+
+    @Override
+    public List<BookDto> getBooksByUserId(Long userId) {
+        // реализовать недстающие методы
+        List<BookDto> bookDtoList = jdbcTemplate.query("SELECT * FROM BOOK WHERE USER_ID=?",
+                BeanPropertyRowMapper.newInstance(BookDto.class), userId);
+        return bookDtoList;
     }
 
     @Override
-    public BookDto getBookById(Long id) {
+    public void deleteBookByUserId(Long userId) {
         // реализовать недстающие методы
-        return null;
-    }
-
-    @Override
-    public void deleteBookById(Long id) {
-        // реализовать недстающие методы
+        jdbcTemplate.update("DELETE FROM BOOK WHERE USER_ID=?", userId);
     }
 }
